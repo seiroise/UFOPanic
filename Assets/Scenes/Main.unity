@@ -599,6 +599,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   _overlapHalfExtents: {x: 1, y: 1, z: 1}
+  _material: {fileID: 2100000, guid: d92191c8cf2359048af83969c9f708ad, type: 2}
+  _positionParam: _MarkerPosition
 --- !u!1 &299959151
 GameObject:
   m_ObjectHideFlags: 0
@@ -1531,7 +1533,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: 45bc4508ab09a4e51be1b6c588d8a525, type: 2}
+  - {fileID: 2100000, guid: d92191c8cf2359048af83969c9f708ad, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

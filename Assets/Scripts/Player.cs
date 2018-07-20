@@ -28,6 +28,12 @@ namespace UFOPanic
         [SerializeField]
         Vector3 _overlapHalfExtents = new Vector3(2f, 2f, 2f);
 
+		[SerializeField]
+		Material _material;
+
+		[SerializeField]
+		string _positionParam = "_MarkerPosition";
+
         Rigidbody _rb;
         Vector2 _moveDirection;
         bool _isMove = false;
@@ -52,6 +58,11 @@ namespace UFOPanic
             }
 
             AttractDown();
+
+			if (_material)
+			{
+				_material.SetVector(_positionParam, transform.position);
+			}
         }
 
         #region 外部インタフェース
