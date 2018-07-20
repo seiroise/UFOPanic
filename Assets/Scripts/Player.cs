@@ -10,9 +10,16 @@ namespace UFOPanic
     {
 
         [SerializeField]
-        float _maxSpeed = 5f;
+        float _speed = 5f;
 
-        [SerializeField]
+		public float speed { get { return _speed; } set { _speed = value; } }
+
+		[SerializeField]
+		float _attractorPower = 10f;
+
+		public float attractPower { get { return _attractorPower; } set { _attractorPower = value; } }
+
+		[SerializeField]
         LayerMask _downRaycastLayer;
 
         [SerializeField]
@@ -21,12 +28,9 @@ namespace UFOPanic
         [SerializeField]
         Vector3 _overlapHalfExtents = new Vector3(2f, 2f, 2f);
 
-        [SerializeField]
-        float _attractorPower = 10f;
-
         Rigidbody _rb;
         Vector2 _moveDirection;
-        bool _isMove;
+        bool _isMove = false;
 
         public bool isMove { get { return _isMove; } set { _isMove = value; } }
 
@@ -63,7 +67,7 @@ namespace UFOPanic
 
         void Move()
         {
-            var diff = _maxSpeed - _rb.velocity.magnitude;
+            var diff = _speed - _rb.velocity.magnitude;
             var m = _moveDirection * diff;
             _rb.AddForce(m.x, 0f, m.y);
         }
