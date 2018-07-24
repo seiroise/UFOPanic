@@ -6,56 +6,61 @@ Shader "Custom/Marker" {
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
-
+		
+		_MarkerTex("Marker Texture", 2D) = "white" {}
 		_MarkerPos ("Marker Position", Vector) = (0, 0, 0, 0)
 		_MarkerDist ("Marker Distance", Range(0, 100)) = 5
+		_MarkerColor ("Marker Color", Color) = (1,1,1,1)
+
+		_EdgeColor("Edge Color", Color) = (1, 1, 1, 1)
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
 		LOD 200
 		
 		CGPROGRAM
-		// Physically based Standard lighting model, and enable shadows on all light types
 		#pragma surface surf Standard fullforwardshadows
-
-		// Use shader model 3.0 target, to get nicer looking lighting
 		#pragma target 3.0
-
-		sampler2D _MainTex;
 
 		struct Input {
 			float2 uv_MainTex;
 			float3 worldPos;
 		};
 
+		sampler2D _MainTex;
 		half _Glossiness;
 		half _Metallic;
 		fixed4 _Color;
 
+		sampler2D _MarkerTex;
 		float4 _MarkerPos;
 		float _MarkerDist;
+		fixed4 _MarkerColor;
 
-		// Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
-		// See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
-		// #pragma instancing_options assumeuniformscaling
-		UNITY_INSTANCING_BUFFER_START(Props)
-			// put more per-instance properties here
-		UNITY_INSTANCING_BUFFER_END(Props)
+		fixed4 _EdgeColor;
 
 		void surf (Input IN, inout SurfaceOutputStandard o) {
 
-			float dist = distance(_MarkerPos, IN.worldPos);
-
-			float3 diff = _MarkerPos - IN.worldPos;
-
-			float2 uv2 = abs(float2(diff.x, diff.z)) / _MarkerDist;
-
+			// MainTexture
 			fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
 
-			fixed4 c2 = tex2D(_MainTex, uv2);
+			// distance
+			float dist = distance(_MarkerPos, IN.worldPos);
+			float power = min(dist / _MarkerDist, 1);
 
-			o.Albedo = c2.rgb * min(0, dist - _MarkerDist);
-			// Metallic and smoothness come from slider variables
+			// Marker fill
+			float x = _Time.y;
+			fixed4 fill = tex2D(_MarkerTex, float2(x + power, 0)) * power;
+			fill *= _MarkerColor;
+
+
+			// Marker edge
+			// 外側の境界は若干アンチエイリアスをかける感じで
+			float edge = smoothstep(0.9, 0.99, power) - smoothstep(0.99, 0.999, power);
+
+			// 最後にそれらをブレンド
+			o.Albedo = fill * (1 - power) + c.rgb * power + _EdgeColor * edge;
+
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
 			o.Alpha = c.a;

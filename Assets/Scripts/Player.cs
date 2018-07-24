@@ -25,14 +25,17 @@ namespace UFOPanic
         [Header("吸い込み")]
 
         [SerializeField]
-        float _attractorPower = 10f;
+        int _attractorPower = 10;
 
-        public float attractPower { get { return _attractorPower; } set { _attractorPower = value; } }
+        public int attractPower { get { return _attractorPower; } set { _attractorField.power = _attractorPower = value; } }
+
+		[SerializeField]
+		AttractorField _attractorField;
 
         [Header("レイヤー関連")]
 
         [SerializeField]
-        LayerMask _downRaycastLayer;
+        LayerMask _floorLayer;
 
         [SerializeField]
         LayerMask _overlapLayer;
@@ -46,11 +49,13 @@ namespace UFOPanic
         Material _material;
 
         [SerializeField]
-        string _positionParam = "_MarkerPosition";
+        string _positionPropName = "_MarkerPosition";
 
         Rigidbody _rb;
         Vector2 _moveDirection;
         bool _isMove = false;
+
+		Vector3 _markerCenter;
 
         public bool isMove { get { return _isMove; } set { _isMove = value; } }
 
@@ -73,10 +78,8 @@ namespace UFOPanic
 
             AttractDown();
 
-            if (_material)
-            {
-                _material.SetVector(_positionParam, transform.position);
-            }
+			RaycastFloor();
+			UpdateMarkerProperty();
         }
 
         #region 外部インタフェース
@@ -109,7 +112,7 @@ namespace UFOPanic
         void AttractDown()
         {
             RaycastHit hit;
-            if (Physics.Raycast(transform.position, Vector3.down, out hit, 100f, _downRaycastLayer))
+            if (Physics.Raycast(transform.position, Vector3.down, out hit, 100f, _floorLayer))
             {
                 var colliders = Physics.OverlapBox(hit.point, _overlapHalfExtents);
                 for (var i = 0; i < colliders.Length; ++i)
@@ -122,6 +125,29 @@ namespace UFOPanic
                 }
             }
         }
+
+		/// <summary>
+		/// 地面に向けてレイキャスト
+		/// </summary>
+		void RaycastFloor()
+		{
+			RaycastHit hit;
+			if (Physics.Raycast(transform.position, Vector3.down, out hit, 100f, _floorLayer))
+			{
+				_markerCenter = hit.point;
+			}
+		}
+
+		/// <summary>
+		/// マーカーのプロパティを更新
+		/// </summary>
+		void UpdateMarkerProperty()
+		{
+			if (_material)
+			{
+				_material.SetVector(_positionPropName, _markerCenter);
+			}
+		}
 
         #endregion
     }
