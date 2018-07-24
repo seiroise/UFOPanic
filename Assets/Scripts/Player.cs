@@ -9,17 +9,29 @@ namespace UFOPanic
     public class Player : MonoBehaviour
     {
 
+        [Header("移動")]
+
         [SerializeField]
         float _speed = 5f;
 
-		public float speed { get { return _speed; } set { _speed = value; } }
+        public float speed { get { return _speed; } set { _speed = value; } }
 
-		[SerializeField]
-		float _attractorPower = 10f;
+        [SerializeField]
+        float _accelerationFactor = 1f;
 
-		public float attractPower { get { return _attractorPower; } set { _attractorPower = value; } }
+        [SerializeField]
+        float _brakeFactor = 1f;
 
-		[SerializeField]
+        [Header("吸い込み")]
+
+        [SerializeField]
+        float _attractorPower = 10f;
+
+        public float attractPower { get { return _attractorPower; } set { _attractorPower = value; } }
+
+        [Header("レイヤー関連")]
+
+        [SerializeField]
         LayerMask _downRaycastLayer;
 
         [SerializeField]
@@ -28,11 +40,13 @@ namespace UFOPanic
         [SerializeField]
         Vector3 _overlapHalfExtents = new Vector3(2f, 2f, 2f);
 
-		[SerializeField]
-		Material _material;
+        [Header("マーカー関連")]
 
-		[SerializeField]
-		string _positionParam = "_MarkerPosition";
+        [SerializeField]
+        Material _material;
+
+        [SerializeField]
+        string _positionParam = "_MarkerPosition";
 
         Rigidbody _rb;
         Vector2 _moveDirection;
@@ -59,10 +73,10 @@ namespace UFOPanic
 
             AttractDown();
 
-			if (_material)
-			{
-				_material.SetVector(_positionParam, transform.position);
-			}
+            if (_material)
+            {
+                _material.SetVector(_positionParam, transform.position);
+            }
         }
 
         #region 外部インタフェース
@@ -79,13 +93,14 @@ namespace UFOPanic
         void Move()
         {
             var diff = _speed - _rb.velocity.magnitude;
-            var m = _moveDirection * diff;
-            _rb.AddForce(m.x, 0f, m.y);
+            var targetVel = new Vector3(_moveDirection.x, 0f, _moveDirection.y) * speed;
+            var f = (targetVel - _rb.velocity) * _accelerationFactor;
+            _rb.AddForce(f.x, 0f, f.z);
         }
 
         void Brake()
         {
-            _rb.AddForce(-_rb.velocity);
+            _rb.AddForce(-_rb.velocity * _brakeFactor);
         }
 
         /// <summary>
